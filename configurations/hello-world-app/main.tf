@@ -12,6 +12,8 @@ provider "aws" {
   region = var.aws_region
 }
 
+# --- --- --- --- --- --- --- --- --- --- #
+
 # Get ami_id
 data "aws_ami" "Amazon_Linux_2023" {
   most_recent = true
@@ -21,6 +23,8 @@ data "aws_ami" "Amazon_Linux_2023" {
     values = ["al2023-ami-2023.5*"]
   }
 }
+
+# --- --- --- --- --- --- --- --- --- --- #
 
 module "hello_world_app" {
 

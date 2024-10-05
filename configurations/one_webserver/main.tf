@@ -15,8 +15,29 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  region = var.aws_region
 }
+
+# --- --- --- --- --- --- --- --- --- --- #
+
+locals {
+  tcp_protocol = "tcp"
+  all_ips      = ["0.0.0.0/0"]
+}
+
+# --- --- --- --- --- --- --- --- --- --- #
+
+# Get ami_id
+data "aws_ami" "Amazon_Linux_2023" {
+  most_recent = true
+  owners = ["137112412989"]
+  filter {
+    name = "name"
+    values = ["al2023-ami-2023.5*"]
+  }
+}
+
+# --- --- --- --- --- --- --- --- --- --- #
 
 resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
@@ -25,7 +46,7 @@ resource "tls_private_key" "ssh_key" {
 
 resource "local_file" "private_key" {
   content  = tls_private_key.ssh_key.private_key_pem
-  filename = "./webserver.pem"
+  filename = "./${var.ssh_keyname}.pem"
 }
 
 /* resource "aws_key_pair" "generated_key" {
@@ -38,20 +59,18 @@ resource "aws_key_pair" "generated_key" {
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
+# --- --- --- --- --- --- --- --- --- --- #
+
 resource "aws_instance" "example" {
-  ami                    = "ami-037774efca2da0726"
+  ami                    = data.aws_ami.Amazon_Linux_2023.id
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.instance.id]
   key_name               = aws_key_pair.generated_key.key_name
 
-  user_data = <<-EOF
-              #!/bin/bash
-              sudo yum install -y httpd
-              sudo sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf
-              echo "Hello, World" | sudo tee /var/www/html/index.html
-              sudo systemctl start httpd
-              sudo systemctl enable httpd
-              EOF
+  user_data              = base64encode(templatefile("${path.module}/user-data.sh", {
+                           http_port = var.http_port
+                           server_text = var.server_text
+  }))
 
   user_data_replace_on_change = true
 
@@ -60,16 +79,18 @@ resource "aws_instance" "example" {
   }
 }
 
+# --- --- --- --- --- --- --- --- --- --- #
+
 resource "aws_security_group" "instance" {
-  name = var.security_group_name
+  name = "example_security_group"
 }
 
 resource "aws_security_group_rule" "allow_8080" {
   type              = "ingress"
-  from_port         = 8080
-  to_port           = 8080
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = var.http_port
+  to_port           = var.http_port
+  protocol          = local.tcp_protocol
+  cidr_blocks       = local.all_ips
   security_group_id = aws_security_group.instance.id
 }
 
@@ -85,12 +106,12 @@ resource "aws_security_group_rule" "allow_8080" {
 
 resource "aws_security_group_rule" "allow_ssh" {
   type              = "ingress"
-  from_port         = 22
-  to_port           = 22
-  protocol          = "tcp"
+  from_port         = var.ssh_port
+  to_port           = var.ssh_port
+  protocol          = local.tcp_protocol
   security_group_id = aws_security_group.instance.id
-  cidr_blocks       = ["0.0.0.0/0"]
-  description       = "Allow SSH traffic from the specified prefix list"
+  cidr_blocks       = local.all_ips
+  description       = "Allow SSH traffic from all IPs"
 }
 
 resource "aws_security_group_rule" "allow_all_egress" {
@@ -99,17 +120,6 @@ resource "aws_security_group_rule" "allow_all_egress" {
   to_port           = 0
   protocol          = "-1"
   security_group_id = aws_security_group.instance.id
-  cidr_blocks       = ["0.0.0.0/0"]  # Allows access to any public address
+  cidr_blocks       = local.all_ips
   description       = "Allow all outbound traffic"
-}
-
-variable "security_group_name" {
-  description = "The name of the security group"
-  type        = string
-  default     = "terraform-example-instance"
-}
-
-output "public_ip" {
-  value       = aws_instance.example.public_ip
-  description = "The public IP of the Instance"
 }
