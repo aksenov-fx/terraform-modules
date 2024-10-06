@@ -26,6 +26,14 @@ data "aws_ami" "Amazon_Linux_2023" {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
+variable "http_port" {
+  description = "Port to open for webserver"
+  type        = number
+  default     = 8080
+}
+
+# --- --- --- --- --- --- --- --- --- --- #
+
 module "hello_world_app" {
 
   source = "../../configurations_modules/hello-world-app"
@@ -42,3 +50,4 @@ module "hello_world_app" {
   enable_egress      = var.enable_egress
   
 }
+

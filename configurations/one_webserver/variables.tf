@@ -7,19 +7,19 @@ variable "aws_region" {
 variable "http_port" {
   description = "Port to open for webserver"
   type        = number
-  default = 8080
+  default     = 8080
 }
 
 variable "ssh_port" {
   description = "SSH port"
   type        = number
-  default = 22
+  default     = 22
 }
 
 variable "server_text" {
   description = "The text the web server should return"
   type        = string
-  default = "Hello, world"
+  default     = "Hello, world"
 }
 
 variable "ssh_keyname" {

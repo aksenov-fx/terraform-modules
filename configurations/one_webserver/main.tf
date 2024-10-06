@@ -23,9 +23,9 @@ provider "aws" {
 # Get ami_id
 data "aws_ami" "Amazon_Linux_2023" {
   most_recent = true
-  owners = ["137112412989"]
+  owners      = ["137112412989"]
   filter {
-    name = "name"
+    name   = "name"
     values = ["al2023-ami-2023.5*"]
   }
 }
@@ -42,17 +42,17 @@ resource "local_file" "private_key" {
 module "one_webserver" {
   source = "../../configurations_modules/one_webserver"
 
-  ami_id                 = data.aws_ami.Amazon_Linux_2023.id
-  instance_type          = "t2.micro"
+  ami_id        = data.aws_ami.Amazon_Linux_2023.id
+  instance_type = "t2.micro"
 
-  http_port = var.http_port
+  http_port   = var.http_port
   server_text = var.server_text
 
   ssh_port = var.ssh_port
 
-  user_data              = base64encode(templatefile("${path.module}/user-data.sh", {
-                           http_port = var.http_port
-                           server_text = var.server_text
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+    http_port   = var.http_port
+    server_text = var.server_text
   }))
 
   #tags = {

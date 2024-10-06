@@ -33,7 +33,7 @@ module "asg" {
   instance_type = var.instance_type
 
   user_data     = base64encode(templatefile("${path.module}/user-data.sh", {
-    server_port = var.server_port
+    http_port   = var.http_port
     server_text = var.server_text
   }))
 
@@ -59,7 +59,7 @@ module "alb" {
 
 resource "aws_lb_target_group" "asg" {
   name     = "hello-world-${var.environment}"
-  port     = var.server_port
+  port     = var.http_port
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default.id
 
