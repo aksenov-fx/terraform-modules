@@ -43,22 +43,25 @@ resource "aws_key_pair" "generated_key" {
 resource "aws_instance" "example" {
   ami                    = var.ami_id
   instance_type          = "t2.micro"
+
+  subnet_id = var.subnet_id
   vpc_security_group_ids = [aws_security_group.instance.id]
+
   key_name               = aws_key_pair.generated_key.key_name
 
   user_data              = var.user_data
 
   user_data_replace_on_change = true
 
-  tags = {
-    Name = "terraform-example"
-  }
+  tags = var.custom_tags
+
 }
 
 # --- --- --- --- --- --- --- --- --- --- #
 
 resource "aws_security_group" "instance" {
   name = "example_security_group"
+  vpc_id = var.vpc_id
 }
 
 resource "aws_security_group_rule" "allow_8080" {

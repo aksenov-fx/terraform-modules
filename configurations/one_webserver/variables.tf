@@ -4,6 +4,12 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "environment" {
+  description = "The name of the environment we're deploying to"
+  type        = string
+  default     = "prod"
+}
+
 variable "http_port" {
   description = "Port to open for webserver"
   type        = number

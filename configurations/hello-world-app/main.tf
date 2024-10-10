@@ -26,19 +26,14 @@ data "aws_ami" "Amazon_Linux_2023" {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
-variable "http_port" {
-  description = "Port to open for webserver"
-  type        = number
-  default     = 8080
-}
-
-# --- --- --- --- --- --- --- --- --- --- #
-
 module "hello_world_app" {
 
   source = "../../configurations_modules/hello-world-app"
 
-  server_text = var.server_text
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+              http_port   = var.http_port
+              server_text = var.server_text
+  }))
 
   environment        = var.environment
 
@@ -48,6 +43,8 @@ module "hello_world_app" {
   enable_autoscaling = false
   ami                = data.aws_ami.Amazon_Linux_2023.id
   enable_egress      = var.enable_egress
+
+  custom_tags = {first_tag = "first_tag_value"}
   
 }
 

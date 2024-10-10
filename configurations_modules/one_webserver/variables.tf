@@ -6,6 +6,14 @@ variable "instance_type" {
   type        = string
 }
 
+variable "vpc_id" {
+  type        = string
+}
+
+variable "subnet_id" {
+  type        = string
+}
+
 variable "http_port" {
   description = "Port to open for webserver"
   type        = number
@@ -24,4 +32,16 @@ variable "server_text" {
 variable "user_data" {
   description = "Base64 encoded init script for the instance"
   type        = string
+}
+
+variable "instance_name" {
+  description = "Tags to set for the instance"
+  type        = map(string)
+  default     = {}
+}
+
+variable "custom_tags" {
+  description = "Custom tags to set on the Instance"
+  type        = map(string)
+  default     = {}
 }

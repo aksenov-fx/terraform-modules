@@ -20,6 +20,20 @@ provider "aws" {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
+data "aws_vpc" "existing_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["TF-VPC1"]
+  }
+}
+
+data "aws_subnet" "public_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["TF-VPC1-public-us-east-2a"]
+  }
+}
+
 # Get ami_id
 data "aws_ami" "Amazon_Linux_2023" {
   most_recent = true
@@ -45,6 +59,9 @@ module "one_webserver" {
   ami_id        = data.aws_ami.Amazon_Linux_2023.id
   instance_type = "t2.micro"
 
+  vpc_id = data.aws_vpc.existing_vpc.id
+  subnet_id = data.aws_subnet.public_subnet.id
+
   http_port   = var.http_port
   server_text = var.server_text
 
@@ -55,9 +72,11 @@ module "one_webserver" {
     server_text = var.server_text
   }))
 
-  #tags = {
-  #  Name = "terraform-example"
-  #}
+  custom_tags = { 
+    name = "${basename(path.cwd)}-${var.environment}"
+    first_tag = "first_tag_value" 
+  }
+
 }
 
 # --- --- --- --- --- --- --- --- --- --- #

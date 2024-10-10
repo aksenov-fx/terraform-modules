@@ -39,12 +39,6 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "server_text" {
-  description = "The text the web server should return"
-  default     = "Hello, World"
-  type        = string
-}
-
 variable "http_port" {
   description = "The port the server will use for HTTP requests"
   type        = number
@@ -61,4 +55,9 @@ variable "enable_egress" {
   description = "Creates security rule to allow egress traffic for VMs if set to true and removes it if set to false"
   type        = bool
   default     = false
+}
+
+variable "user_data" {
+  description = "Base64 encoded init script for the instance"
+  type        = string
 }

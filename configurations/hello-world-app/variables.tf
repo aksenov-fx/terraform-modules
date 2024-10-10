@@ -3,10 +3,18 @@
 # You must provide a value for each of these parameters.
 # ---------------------------------------------------------------------------------------------------------------------
 
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
 # ---------------------------------------------------------------------------------------------------------------------
+
+variable "http_port" {
+  description = "Port to open for webserver"
+  type        = number
+  default     = 8080
+}
 
 variable "server_text" {
   description = "The text the web server should return"

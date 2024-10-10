@@ -12,38 +12,35 @@ terraform {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
-data "aws_vpc" "default" {
-  default = true
-}
+# data "aws_vpc" "default" {
+#   default = true
+# }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-}
+# data "aws_subnets" "default" {
+#   filter {
+#     name   = "vpc-id"
+#     values = [data.aws_vpc.default.id]
+#   }
+# }
 
 # --- --- --- --- --- --- --- --- --- --- #
 
 module "asg" {
   source = "../../general_purpose_modules/asg-rolling-deploy"
 
-  cluster_name  = "hello-world-${var.environment}"
-  ami           = var.ami
-  instance_type = var.instance_type
+  cluster_name       = "${basename(path.cwd)}-${var.environment}"
+  ami                = var.ami
+  instance_type      = var.instance_type
 
-  user_data     = base64encode(templatefile("${path.module}/user-data.sh", {
-    http_port   = var.http_port
-    server_text = var.server_text
-  }))
+  user_data          = var.user_data
 
   min_size           = var.min_size
   max_size           = var.max_size
   enable_autoscaling = var.enable_autoscaling
 
-  subnet_ids        = data.aws_subnets.default.ids
-  target_group_arns = [aws_lb_target_group.asg.arn]
-  health_check_type = "ELB"
+  subnet_ids         = data.aws_subnets.default.ids
+  target_group_arns  = [aws_lb_target_group.asg.arn]
+  health_check_type  = "ELB"
   
   custom_tags = var.custom_tags
 }
