@@ -20,27 +20,13 @@ provider "aws" {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
-data "aws_vpc" "existing_vpc" {
-  filter {
-    name   = "tag:Name"
-    values = ["TF-VPC1"]
-  }
-}
-
-data "aws_subnet" "public_subnet" {
-  filter {
-    name   = "tag:Name"
-    values = ["TF-VPC1-public-us-east-2a"]
-  }
-}
-
 # Get ami_id
-data "aws_ami" "Amazon_Linux_2023" {
+data "aws_ami" "ami" {
   most_recent = true
-  owners      = ["137112412989"]
+  owners      = ["137112412989"] #Amazon
   filter {
     name   = "name"
-    values = ["al2023-ami-2023.5*"]
+    values = ["al2023-ami-2023.5*"] #Amazon_Linux_2023
   }
 }
 
@@ -56,11 +42,11 @@ resource "local_file" "private_key" {
 module "one_webserver" {
   source = "../../configurations_modules/one_webserver"
 
-  ami_id        = data.aws_ami.Amazon_Linux_2023.id
+  ami_id        = data.aws_ami.ami.id
   instance_type = "t2.micro"
 
-  vpc_id = data.aws_vpc.existing_vpc.id
-  subnet_id = data.aws_subnet.public_subnet.id
+  vpc_name = "TF-VPC1"
+  public_subnet_name = "TF-VPC1-public-us-east-2a"
 
   http_port   = var.http_port
   server_text = var.server_text

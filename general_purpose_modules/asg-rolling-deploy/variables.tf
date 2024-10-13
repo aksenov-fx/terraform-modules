@@ -53,6 +53,10 @@ variable "max_size" {
   }
 }
 
+variable "vpc_id" {
+  type        = string
+}
+
 variable "subnet_ids" {
   description = "The subnet IDs to deploy to"
   type        = list(string)
@@ -97,10 +101,9 @@ variable "custom_tags" {
   default     = {}
 }
 
-variable "server_port" {
+variable "http_port" {
   description = "The port the server will use for HTTP requests"
   type        = number
-  default     = 8080
 }
 
 variable "enable_egress" {

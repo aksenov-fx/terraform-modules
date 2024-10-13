@@ -37,10 +37,24 @@ module "vpc" {
   private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k)]
 
   public_subnets =  [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k+100)]
-  map_public_ip_on_launch = true
+  #map_public_ip_on_launch = true
 
   tags = {
     Example = "example_tag"
   }
 
 }
+
+# --- --- --- --- --- --- --- --- --- --- #
+
+# resource "aws_vpc_endpoint" "s3" {
+#   vpc_id       = module.vpc.vpc_id
+#   service_name = "com.amazonaws.us-east-2.s3"  # S3 Endpoint for us-east-2
+
+#   # Attach the VPC endpoint to the route tables of the private subnets
+#   route_table_ids = module.vpc.private_route_table_ids
+
+#   tags = {
+#     Name = "s3-vpc-endpoint"
+#   }
+# }

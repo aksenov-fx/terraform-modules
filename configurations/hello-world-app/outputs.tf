@@ -3,6 +3,6 @@ output "public_ip" {
   description = "The domain name of the load balancer"
 }
 
-output "http_port" {
-  value       = var.http_port
+output "LB_http_port" {
+  value       = var.LB_http_port
 }

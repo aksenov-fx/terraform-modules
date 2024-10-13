@@ -23,6 +23,18 @@ variable "enable_autoscaling" {
   type        = bool
 }
 
+variable "vpc_name" {
+  type        = string
+}
+
+variable "private_subnet_name_prefix" {
+  type        = string
+}
+
+variable "public_subnet_name_prefix" {
+  type        = string
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # OPTIONAL PARAMETERS
 # These parameters have reasonable defaults.
@@ -42,7 +54,11 @@ variable "instance_type" {
 variable "http_port" {
   description = "The port the server will use for HTTP requests"
   type        = number
-  default     = 8080
+}
+
+variable "LB_http_port" {
+  description = "The port the server will use for HTTP requests"
+  type        = number
 }
 
 variable "custom_tags" {

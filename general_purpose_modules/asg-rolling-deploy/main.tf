@@ -28,6 +28,7 @@ resource "aws_launch_configuration" "example" {
   instance_type   = var.instance_type
   security_groups = [aws_security_group.instance.id]
   user_data       = var.user_data
+  associate_public_ip_address =  true 
 
   # Required when using a launch configuration with an auto scaling group.
   lifecycle {
@@ -39,17 +40,18 @@ resource "aws_launch_configuration" "example" {
   }
 }
 
-
 resource "aws_security_group" "instance" {
   name = "${var.cluster_name}-instance"
+  vpc_id = var.vpc_id
+
 }
 
 resource "aws_security_group_rule" "allow_server_http_inbound" {
   type              = "ingress"
   security_group_id = aws_security_group.instance.id
 
-  from_port   = var.server_port
-  to_port     = var.server_port
+  from_port   = var.http_port
+  to_port     = var.http_port
   protocol    = local.tcp_protocol
   cidr_blocks = local.all_ips
 }

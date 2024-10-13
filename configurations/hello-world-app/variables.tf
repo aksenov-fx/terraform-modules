@@ -10,8 +10,13 @@
 # These parameters have reasonable defaults.
 # ---------------------------------------------------------------------------------------------------------------------
 
+variable "LB_http_port" {
+  type        = number
+  default     = 80
+}
+
 variable "http_port" {
-  description = "Port to open for webserver"
+  description = "Port the webserver will listen to on EC2 instances (not an LB port)"
   type        = number
   default     = 8080
 }

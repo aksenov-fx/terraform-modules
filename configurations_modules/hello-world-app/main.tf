@@ -12,16 +12,37 @@ terraform {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
-# data "aws_vpc" "default" {
-#   default = true
-# }
+data "aws_vpc" "existing_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.vpc_name}"]
+  }
+}
 
-# data "aws_subnets" "default" {
-#   filter {
-#     name   = "vpc-id"
-#     values = [data.aws_vpc.default.id]
-#   }
-# }
+data "aws_subnets" "vpc_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.existing_vpc.id]
+  }
+}
+
+data "aws_subnet" "subnets" {
+  for_each = toset(data.aws_subnets.vpc_subnets.ids)
+  id       = each.value
+}
+
+locals {
+  public_subnets = [
+    for subnet in data.aws_subnet.subnets :
+    subnet.id if can(subnet.tags["Name"]) && strcontains(lower(subnet.tags["Name"]), lower(var.public_subnet_name_prefix))
+  ]
+
+  # private_subnets = [
+  #   for subnet in data.aws_subnet.subnets :
+  #   subnet.id if can(subnet.tags["Name"]) && strcontains(lower(subnet.tags["Name"]), lower(var.private_subnet_name_prefix))
+  # ]
+
+}
 
 # --- --- --- --- --- --- --- --- --- --- #
 
@@ -38,7 +59,11 @@ module "asg" {
   max_size           = var.max_size
   enable_autoscaling = var.enable_autoscaling
 
-  subnet_ids         = data.aws_subnets.default.ids
+  vpc_id             = data.aws_vpc.existing_vpc.id
+  subnet_ids         = local.public_subnets
+  http_port          = var.http_port
+  enable_egress      = var.enable_egress
+
   target_group_arns  = [aws_lb_target_group.asg.arn]
   health_check_type  = "ELB"
   
@@ -49,16 +74,19 @@ module "asg" {
 
 module "alb" {
   source = "../../general_purpose_modules/networking/alb"
-
   alb_name   = "hello-world-${var.environment}"
-  subnet_ids = data.aws_subnets.default.ids
+
+  vpc_id = data.aws_vpc.existing_vpc.id
+  subnet_ids = local.public_subnets
+
+  LB_http_port = 80
 }
 
 resource "aws_lb_target_group" "asg" {
   name     = "hello-world-${var.environment}"
   port     = var.http_port
   protocol = "HTTP"
-  vpc_id   = data.aws_vpc.default.id
+  vpc_id   = data.aws_vpc.existing_vpc.id
 
   health_check {
     path                = "/"

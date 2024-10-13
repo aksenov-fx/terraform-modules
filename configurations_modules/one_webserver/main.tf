@@ -23,6 +23,22 @@ locals {
 
 # --- --- --- --- --- --- --- --- --- --- #
 
+data "aws_vpc" "existing_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.vpc_name}"]
+  }
+}
+
+data "aws_subnet" "public_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.public_subnet_name}"]
+  }
+}
+
+# --- --- --- --- --- --- --- --- --- --- #
+
 resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -44,7 +60,7 @@ resource "aws_instance" "example" {
   ami                    = var.ami_id
   instance_type          = "t2.micro"
 
-  subnet_id = var.subnet_id
+  subnet_id = data.aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.instance.id]
 
   key_name               = aws_key_pair.generated_key.key_name
@@ -61,7 +77,7 @@ resource "aws_instance" "example" {
 
 resource "aws_security_group" "instance" {
   name = "example_security_group"
-  vpc_id = var.vpc_id
+  vpc_id = data.aws_vpc.existing_vpc.id
 }
 
 resource "aws_security_group_rule" "allow_8080" {

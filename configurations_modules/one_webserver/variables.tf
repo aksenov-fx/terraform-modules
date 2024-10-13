@@ -6,11 +6,11 @@ variable "instance_type" {
   type        = string
 }
 
-variable "vpc_id" {
+variable "vpc_name" {
   type        = string
 }
 
-variable "subnet_id" {
+variable "public_subnet_name" {
   type        = string
 }
 

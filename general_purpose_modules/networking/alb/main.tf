@@ -12,7 +12,6 @@ terraform {
 # --- --- --- --- --- --- --- --- --- --- #
 
 locals {
-  http_port    = 80
   any_port     = 0
   any_protocol = "-1"
   tcp_protocol = "tcp"
@@ -32,7 +31,7 @@ resource "aws_lb" "example" {
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.example.arn
-  port              = local.http_port
+  port              = var.LB_http_port
   protocol          = "HTTP"
 
   # By default, return a simple 404 page
@@ -51,14 +50,15 @@ resource "aws_lb_listener" "http" {
 
 resource "aws_security_group" "alb" {
   name = var.alb_name
+  vpc_id = var.vpc_id
 }
 
 resource "aws_security_group_rule" "allow_http_inbound" {
   type              = "ingress"
   security_group_id = aws_security_group.alb.id
 
-  from_port   = local.http_port
-  to_port     = local.http_port
+  from_port   = var.LB_http_port
+  to_port     = var.LB_http_port
   protocol    = local.tcp_protocol
   cidr_blocks = local.all_ips
 }
