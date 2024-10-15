@@ -47,7 +47,8 @@ locals {
 # --- --- --- --- --- --- --- --- --- --- #
 
 module "asg" {
-  source = "../../general_purpose_modules/asg-rolling-deploy"
+  source = "https://github.com/aksenov-fx/terraform-modules.git/general_purpose_modules/asg-rolling-deploy"
+  #source = "../../general_purpose_modules/asg-rolling-deploy"
 
   cluster_name       = "${basename(path.cwd)}-${var.environment}"
   ami                = var.ami
@@ -73,7 +74,9 @@ module "asg" {
 # --- --- --- --- --- --- --- --- --- --- #
 
 module "alb" {
-  source = "../../general_purpose_modules/networking/alb"
+  source = "https://github.com/aksenov-fx/terraform-modules.git/general_purpose_modules/networking/alb"
+  #source = "../../general_purpose_modules/networking/alb"
+
   alb_name   = "hello-world-${var.environment}"
 
   vpc_id = data.aws_vpc.existing_vpc.id

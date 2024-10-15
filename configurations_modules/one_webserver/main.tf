@@ -62,6 +62,7 @@ resource "aws_instance" "example" {
 
   subnet_id = data.aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.instance.id]
+  associate_public_ip_address = true
 
   key_name               = aws_key_pair.generated_key.key_name
 
